@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامج التعويضي والاطلاع على الأوراق</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+      color: #2c3e50;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2, h3 {
+      color: #34495e;
+    }
+
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: bold;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    img {
+      margin-top: 20px;
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .results {
+      margin-top: 20px;
+      background-color: #ecf0f1;
+      padding: 15px;
+      border-radius: 6px;
+    }
+
+    .results ul {
+      padding-right: 20px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        margin: 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>برنامج التعويضي والاطلاع على الأوراق</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>عرض برنامج التخصص</h2>
+
+      <label for="level">اختر المستوى:</label>
+      <select id="level" onchange="populateSpecialties()">
+        <option value="">-- اختر --</option>
+        <option value="license">ليسانس</option>
+        <option value="master">ماستر</option>
+      </select>
+
+      <label for="specialty">اختر التخصص:</label>
+      <select id="specialty" onchange="showProgramImage()">
+        <option value="">-- اختر التخصص --</option>
+      </select>
+
+      <div id="programImageContainer"></div>
+    </section>
+
+    <hr style="margin: 30px 0;">
+
+  </main>
+
+  <script>
+    const specialties = {
+      license: [
+        "اقتصاد كمي",
+        "اقتصاد دولي",
+        "اقتصاد وتسيير المؤسسات",
+        "اقتصاد مالي ونقدي",
+        "السنة الثانية جذع مشترك"
+      ],
+      master: [
+        "ماستر اقتصاد كمي",
+        " ماستر اقتصاد دولي",
+        " ماستر اقتصاد وتسيير المؤسسات",
+        " ماستر اقتصاد مالي ونقدي"
+      ]
+    };
+
+    const programImages = {
+      "اقتصاد كمي": "programs/LEQ.png",
+      "اقتصاد دولي": "programs/LEI.png",
+      "اقتصاد وتسيير المؤسسات": "programs/LEGE.png",
+      "اقتصاد مالي ونقدي": "programs/LEMF.png",
+      "السنة الثانية جذع مشترك": "programs/2TC.png",
+       " ماستر اقتصاد كمي": "programs/MEQ.png",
+      " ماستر اقتصاد دولي": "programs/MEI.png",
+      " ماستر اقتصاد وتسيير المؤسسات": "programs/MEGE.png",
+      " ماستر اقتصاد مالي ونقدي": "programs/MEMF.png",
+    };
+
+    function populateSpecialties() {
+      const level = document.getElementById("level").value;
+      const specialtySelect = document.getElementById("specialty");
+      specialtySelect.innerHTML = '<option value="">-- اختر التخصص --</option>';
+
+      if (specialties[level]) {
+        specialties[level].forEach(s => {
+          const option = document.createElement("option");
+          option.value = s;
+          option.textContent = s;
+          specialtySelect.appendChild(option);
+        });
+      }
+
+      document.getElementById("programImageContainer").innerHTML = "";
+    }
+
+    function showProgramImage() {
+      const specialty = document.getElementById("specialty").value;
+      const imageUrl = programImages[specialty];
+      const container = document.getElementById("programImageContainer");
+
+      if (imageUrl) {
+        container.innerHTML = `<img src="${imageUrl}" alt="برنامج ${specialty}">`;
+      } else {
+        container.innerHTML = "";
+      }
+    }
+
+  </script>
+
+</body>
+</html>
+
+
+
+
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>البحث عن الطلبة المسجلين في الامتحان التعويضي</title>
+  <style>
+    body { font-family: Arial; direction: rtl; padding: 20px; background: #f5f5f5; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+    input { padding: 10px; width: 100%; margin-top: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h1>البحث عن الطلبة المسجلين في الامتحان التعويضي</h1>
+  <label for="search">اختر أو اكتب اسم المقياس:</label>
+  <input list="modules" id="search" placeholder="اكتب اسم المقياس أو ابحث بالاسم...">
+  <datalist id="modules"></datalist>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>اللقب</th>
+        <th>رقم التسجيل</th>
+        <th>المقياس</th>
+        <th>التخصص</th>
+        <th>المستوى</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv'; // ← ضع رابط CSV هنا
+
+    async function fetchCSV(url) {
+      const response = await fetch(url);
+      const text = await response.text();
+      return text.split('\n').map(row => row.split(','));
+    }
+
+    function getUniqueModules(data) {
+      const moduleIndex = data[0].indexOf("المقياس");
+      const modules = new Set();
+      data.slice(1).forEach(row => {
+        if (row[moduleIndex]) modules.add(row[moduleIndex].trim());
+      });
+      return [...modules];
+    }
+
+    function fillModuleSuggestions(modules) {
+      const datalist = document.getElementById("modules");
+      datalist.innerHTML = "";
+      modules.forEach(module => {
+        const option = document.createElement("option");
+        option.value = module;
+        datalist.appendChild(option);
+      });
+    }
+
+    function displayData(data) {
+      const tbody = document.querySelector('#dataTable tbody');
+      tbody.innerHTML = '';
+      data.slice(1).forEach(row => {
+        if (row.length < 6) return;
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setupSearch(data) {
+      const input = document.getElementById('search');
+      input.addEventListener('input', () => {
+        const term = input.value.toLowerCase();
+        const filtered = data.filter((row, i) => {
+          if (i === 0) return false;
+          return row.some(cell => cell.toLowerCase().includes(term));
+        });
+        displayData([data[0], ...filtered]);
+      });
+    }
+
+    fetchCSV(sheetUrl).then(data => {
+      const modules = getUniqueModules(data);
+      fillModuleSuggestions(modules);
+      displayData(data);
+      setupSearch(data);
+    });
+  </script>
+
+</body>
+</html>
