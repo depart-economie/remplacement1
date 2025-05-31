@@ -187,7 +187,7 @@
 
 <html lang="ar">
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <meta charset="UTF-8">
   <title>التحقق من وجود الامتحان التعويضي</title>
   <style>
@@ -281,29 +281,36 @@
       displayData(data);
       setupSearch(data);
     });
-    async function exportToPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    function exportToPDF() {
+  const element = document.createElement("div");
 
-    doc.setFont("Helvetica");
-    doc.setFontSize(12);
-    doc.text("قائمة الطلبة المعنيين بالامتحان التعويضي", 105, 10, { align: "center" });
+  // إضافة عنوان التقرير
+  const title = document.createElement("h2");
+  title.innerText = "قائمة الطلبة المعنيين بالامتحان التعويضي";
+  title.style.textAlign = "center";
+  title.style.direction = "rtl";
+  title.style.fontFamily = "Arial";
+  element.appendChild(title);
 
-    const table = document.querySelector("#dataTable");
-    const rows = [...table.rows];
-    const data = rows.map(row => [...row.cells].map(cell => cell.innerText));
+  // استنساخ الجدول وإضافته إلى العنصر المؤقت
+  const table = document.getElementById("dataTable").cloneNode(true);
+  table.style.direction = "rtl";
+  table.style.textAlign = "right";
+  table.style.fontFamily = "Arial";
+  element.appendChild(table);
 
-    // تنسيق الجدول في PDF
-    let startY = 20;
-    data.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        doc.text(cell, 20 + colIndex * 30, startY + rowIndex * 10);
-      });
-    });
+  // إعدادات التصدير
+  const opt = {
+    margin:       0.5,
+    filename:     'قائمة_الطلبة.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
 
-    doc.save("قائمة_الطلبة.pdf");
-  }
-  </script>
+  html2pdf().set(opt).from(element).save();
+}
+</script>
 
 </body>
 </html>
