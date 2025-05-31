@@ -282,34 +282,32 @@
       setupSearch(data);
     });
     function exportToPDF() {
-  const element = document.createElement("div");
+    const element = document.getElementById("dataTable");
 
-  // إضافة عنوان التقرير
-  const title = document.createElement("h2");
-  title.innerText = "قائمة الطلبة المعنيين بالامتحان التعويضي";
-  title.style.textAlign = "center";
-  title.style.direction = "rtl";
-  title.style.fontFamily = "Arial";
-  element.appendChild(title);
+    const opt = {
+      margin: 0.5,
+      filename: 'قائمة_الطلبة.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
 
-  // استنساخ الجدول وإضافته إلى العنصر المؤقت
-  const table = document.getElementById("dataTable").cloneNode(true);
-  table.style.direction = "rtl";
-  table.style.textAlign = "right";
-  table.style.fontFamily = "Arial";
-  element.appendChild(table);
+    // نسخ مؤقت لدعم RTL وخط عربي
+    const clone = element.cloneNode(true);
+    clone.style.direction = 'rtl';
+    clone.style.textAlign = 'right';
 
-  // إعدادات التصدير
-  const opt = {
-    margin:       0.5,
-    filename:     'قائمة_الطلبة.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-  };
+    // غلاف يحتوي على عنوان + جدول
+    const wrapper = document.createElement("div");
+    const title = document.createElement("h2");
+    title.textContent = "قائمة الطلبة المعنيين بالامتحان التعويضي";
+    title.style.textAlign = 'center';
+    wrapper.appendChild(title);
+    wrapper.appendChild(clone);
+    wrapper.style.fontFamily = 'Arial, sans-serif';
 
-  html2pdf().set(opt).from(element).save();
-}
+    html2pdf().set(opt).from(wrapper).save();
+  }
 </script>
 
 </body>
