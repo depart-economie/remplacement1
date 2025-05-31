@@ -187,6 +187,7 @@
 
 <html lang="ar">
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <meta charset="UTF-8">
   <title>التحقق من وجود الامتحان التعويضي</title>
   <style>
@@ -218,7 +219,7 @@
     </thead>
     <tbody></tbody>
   </table>
-
+  <button onclick="exportToPDF()">تحميل القائمة كـ PDF</button>
   <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv'; // ← ضع رابط CSV هنا
 
@@ -280,6 +281,28 @@
       displayData(data);
       setupSearch(data);
     });
+    async function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont("Helvetica");
+    doc.setFontSize(12);
+    doc.text("قائمة الطلبة المعنيين بالامتحان التعويضي", 105, 10, { align: "center" });
+
+    const table = document.querySelector("#dataTable");
+    const rows = [...table.rows];
+    const data = rows.map(row => [...row.cells].map(cell => cell.innerText));
+
+    // تنسيق الجدول في PDF
+    let startY = 20;
+    data.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        doc.text(cell, 20 + colIndex * 30, startY + rowIndex * 10);
+      });
+    });
+
+    doc.save("قائمة_الطلبة.pdf");
+  }
   </script>
 
 </body>
