@@ -183,24 +183,25 @@
   </script>
 
 </body>
+</html>
+
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>تبريرات التغيب في الامتحان</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta charset="UTF-8">
+  <title>التحقق من وجود الامتحان التعويضي</title>
   <style>
     body { font-family: Arial; direction: rtl; padding: 20px; background: #f5f5f5; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
     input { padding: 10px; width: 100%; margin-top: 10px; font-size: 16px; }
-    button { padding: 10px 20px; margin-top: 20px; font-size: 16px; }
   </style>
 </head>
 <body>
-
-  <h1>تبريرات التغيب في الامتحان حسب المقاييس</h1>
-  <p>القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
-
+  <header>
+    <h1>تبريرات التغيب في الامتحان حسب المقاييس</h1>
+    <p dir="rtl">القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
+  <header>
   <label for="search">اختر أو اكتب اسم المقياس:</label>
   <input list="modules" id="search" placeholder="اكتب اسم المقياس ...">
   <datalist id="modules"></datalist>
@@ -218,72 +219,33 @@
     </thead>
     <tbody></tbody>
   </table>
-
-  <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>قائمة الطلبة المعنيين بالامتحان التعويضي</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      direction: rtl;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #2980b9;
-    }
-  </style>
-</head>
-<body>
-
-  <h2 style="text-align: center;">قائمة الطلبة المعنيين بالامتحان التعويضي</h2>
-
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>الاسم</th>
-        <th>اللقب</th>
-        <th>رقم التسجيل</th>
-        <th>المقياس</th>
-        <th>التخصص</th>
-        <th>المستوى</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <button onclick="exportToPDF()">تحميل القائمة كـ pdf</button>
-
+  <button onclick="exportToPDF()">تحميل القائمة كـ PDF</button>
   <script>
-    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv';
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv'; // ← ضع رابط CSV هنا
 
     async function fetchCSV(url) {
       const response = await fetch(url);
       const text = await response.text();
       return text.split('\n').map(row => row.split(','));
+    }
+
+    function getUniqueModules(data) {
+      const moduleIndex = data[0].indexOf("المقياس");
+      const modules = new Set();
+      data.slice(1).forEach(row => {
+        if (row[moduleIndex]) modules.add(row[moduleIndex].trim());
+      });
+      return [...modules];
+    }
+
+    function fillModuleSuggestions(modules) {
+      const datalist = document.getElementById("modules");
+      datalist.innerHTML = "";
+      modules.forEach(module => {
+        const option = document.createElement("option");
+        option.value = module;
+        datalist.appendChild(option);
+      });
     }
 
     function displayData(data) {
@@ -301,42 +263,52 @@
       });
     }
 
-    async function loadDataAndExport() {
-      const data = await fetchCSV(sheetUrl);
+    function setupSearch(data) {
+      const input = document.getElementById('search');
+      input.addEventListener('input', () => {
+        const term = input.value.toLowerCase();
+        const filtered = data.filter((row, i) => {
+          if (i === 0) return false;
+          return row.some(cell => cell.toLowerCase().includes(term));
+        });
+        displayData([data[0], ...filtered]);
+      });
+    }
+
+    fetchCSV(sheetUrl).then(data => {
+      const modules = getUniqueModules(data);
+      fillModuleSuggestions(modules);
       displayData(data);
-    }
-
+      setupSearch(data);
+    });
     function exportToPDF() {
-      const element = document.getElementById("dataTable");
+    const element = document.getElementById("dataTable");
 
-      const opt = {
-        margin: 0.5,
-        filename: 'قائمة_الطلبة.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
+    const opt = {
+      margin: 0.5,
+      filename: 'قائمة_الطلبة.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
 
-      // نسخ مؤقت لدعم RTL وخط عربي
-      const clone = element.cloneNode(true);
-      clone.style.direction = 'rtl';
-      clone.style.textAlign = 'right';
+    // نسخ مؤقت لدعم RTL وخط عربي
+    const clone = element.cloneNode(true);
+    clone.style.direction = 'rtl';
+    clone.style.textAlign = 'right';
 
-      // غلاف يحتوي على عنوان + جدول
-      const wrapper = document.createElement("div");
-      const title = document.createElement("h2");
-      title.textContent = "قائمة الطلبة المعنيين بالامتحان التعويضي";
-      title.style.textAlign = 'center';
-      wrapper.appendChild(title);
-      wrapper.appendChild(clone);
-      wrapper.style.fontFamily = 'Arial, sans-serif';
+    // غلاف يحتوي على عنوان + جدول
+    const wrapper = document.createElement("div");
+    const title = document.createElement("h2");
+    title.textContent = "قائمة الطلبة المعنيين بالامتحان التعويضي";
+    title.style.textAlign = 'center';
+    wrapper.appendChild(title);
+    wrapper.appendChild(clone);
+    wrapper.style.fontFamily = 'Arial, sans-serif';
 
-      html2pdf().set(opt).from(wrapper).save();
-    }
-
-    // تحميل البيانات عند تحميل الصفحة
-    window.onload = loadDataAndExport;
-  </script>
+    html2pdf().set(opt).from(wrapper).save();
+  }
+</script>
 
 </body>
 </html>
