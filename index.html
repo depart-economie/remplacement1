@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>برنامج التعويضي والاطلاع على الأوراق</title>
+  <title>برنامج الامتحانات التعويضية والاطلاع على الأوراق</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- html2pdf -->
@@ -26,7 +26,7 @@
     }
 
     main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 30px auto;
       padding: 20px;
       background: white;
@@ -77,23 +77,6 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
-    .notice{
-     text-align: center;
-     margin: 8px 0 14px 0;
-     color: #2c3e50;
-    }
-    .center-title{
-     text-align: center;
-    }
-
-    .results {
-      margin-top: 20px;
-      background-color: #ecf0f1;
-      padding: 15px;
-      border-radius: 6px;
-    }
-
-    .results ul { padding-right: 20px; }
 
     @media (max-width: 600px) {
       main { margin: 10px; padding: 15px; }
@@ -102,19 +85,38 @@
     /* جدول */
     table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
     th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+
+    /* PDF Viewer */
+    .viewer {
+      width: 100%;
+      height: 780px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 20px;
+      background: #fff;
+    }
+
+    /* Notice centered */
+    .notice{
+      text-align: center;
+      margin: 8px 0 14px 0;
+      color: #2c3e50;
+    }
+
+    .center-title { text-align: center; }
+
   </style>
 </head>
 
 <body>
   <header>
-    <h1> قسم العلوم الاقتصادية</h1>
     <h1>برنامج الامتحانات التعويضية والاطلاع على الأوراق</h1>
   </header>
 
   <main>
-    <!-- القسم 1: عرض البرامج -->
+    <!-- القسم 1: عرض برنامج التخصص (PDF من Google Drive) -->
     <section>
-      <h2 class="center-title">عرض البرنامج </h2>
+      <h2>عرض برنامج التخصص</h2>
 
       <label for="level">اختر المستوى:</label>
       <select id="level" onchange="populateSpecialties()">
@@ -124,20 +126,19 @@
       </select>
 
       <label for="specialty">اختر التخصص:</label>
-      <select id="specialty" onchange="showProgramImage()">
+      <select id="specialty" onchange="showProgramPdf()">
         <option value="">-- اختر التخصص --</option>
       </select>
 
-      <div id="programImageContainer"></div>
+      <div id="programViewerContainer"></div>
     </section>
 
     <hr style="margin: 30px 0;">
 
-    <!-- القسم 2: تبريرات التغيب + PDF -->
+    <!-- القسم 2: تبريرات التغيب + بحث حسب المقياس فقط + تصدير PDF -->
     <section>
       <h2 class="center-title">تبريرات التغيب في الامتحان حسب المقاييس</h2>
       <p class="notice">القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
-      <p class="notice">في حالة عدم ظهور مقياسكم في خانة البحث فهذا يعني انكم غير معنيين بالامتحان التعويضي</p>
 
       <label for="search">اختر أو اكتب اسم المقياس:</label>
       <input list="modules" id="search" placeholder="اكتب اسم المقياس ..." />
@@ -162,7 +163,9 @@
   </main>
 
   <script>
-    // ---------- برامج التخصص (كما هي) ----------
+    // --------------------------
+    // 1) برامج التخصص (PDF من Google Drive)
+    // --------------------------
     const specialties = {
       license: [
         "السنة الأولى تداول واسواق مالية",
@@ -204,36 +207,32 @@
         });
       }
 
-      document.getElementById("programImageContainer").innerHTML = "";
+      document.getElementById("programViewerContainer").innerHTML = "";
     }
 
-    function showProgramImage() {
-  const specialty = document.getElementById("specialty").value;
-  const pdfUrl = programPdfs[specialty];
-  const container = document.getElementById("programImageContainer");
+    function showProgramPdf() {
+      const specialty = document.getElementById("specialty").value;
+      const pdfUrl = programPdfs[specialty];
+      const container = document.getElementById("programViewerContainer");
 
-  if (pdfUrl) {
-    container.innerHTML = `
-      <iframe
-        src="${pdfUrl}"
-        style="width:100%; height:700px; border:1px solid #ccc; border-radius:8px; margin-top:20px;"
-        allow="autoplay"
-      ></iframe>
-    `;
-  } else {
-    container.innerHTML = "";
-  }
-}
+      if (pdfUrl) {
+        container.innerHTML = `
+          <iframe class="viewer" src="${pdfUrl}"></iframe>
+        `;
+      } else {
+        container.innerHTML = "";
+      }
+    }
 
-
-    // ---------- CSV + الجدول ----------
+    // --------------------------
+    // 2) جدول التبريرات من Google Sheets CSV
+    // --------------------------
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv';
 
-    // ملاحظة: هذا parser بسيط. إن كان CSV يحتوي فواصل داخل نصوص بين " " فالأفضل استخدام PapaParse.
+    // Parser بسيط (إذا CSV يحتوي فواصل داخل " " استخدم PapaParse)
     async function fetchCSV(url) {
       const response = await fetch(url, { cache: "no-store" });
       const text = await response.text();
-
       return text
         .trim()
         .split('\n')
@@ -243,18 +242,15 @@
     function getUniqueModules(data) {
       const moduleIndex = data[0].indexOf("المقياس");
       const modules = new Set();
-
       data.slice(1).forEach(row => {
         if (row[moduleIndex]) modules.add(row[moduleIndex].trim());
       });
-
       return [...modules];
     }
 
     function fillModuleSuggestions(modules) {
       const datalist = document.getElementById("modules");
       datalist.innerHTML = "";
-
       modules.forEach(module => {
         const option = document.createElement("option");
         option.value = module;
@@ -279,32 +275,29 @@
       });
     }
 
+    // بحث فقط داخل عمود "المقياس"
     function setupSearch(fullData) {
-  const input = document.getElementById('search');
-  const moduleIndex = fullData[0].indexOf("المقياس"); // عمود المقياس من الهيدر
+      const input = document.getElementById('search');
+      const moduleIndex = fullData[0].indexOf("المقياس");
 
-  input.addEventListener('input', () => {
-    const term = (input.value || "").trim().toLowerCase();
+      input.addEventListener('input', () => {
+        const term = (input.value || "").trim().toLowerCase();
 
-    // إذا خانة البحث فارغة: اعرض كل البيانات
-    if (!term) {
-      displayData(fullData);
-      return;
+        if (!term) {
+          displayData(fullData);
+          return;
+        }
+
+        const filtered = fullData.filter((row, i) => {
+          if (i === 0) return false;
+          const moduleCell = (row[moduleIndex] || "").toLowerCase();
+          return moduleCell.includes(term);
+        });
+
+        displayData([fullData[0], ...filtered]);
+      });
     }
 
-    // فلترة فقط على عمود "المقياس"
-    const filtered = fullData.filter((row, i) => {
-      if (i === 0) return false; // تجاهل الهيدر
-      const moduleCell = (row[moduleIndex] || "").toLowerCase();
-      return moduleCell.includes(term);
-    });
-
-    displayData([fullData[0], ...filtered]);
-  });
-}
-
-
-    // تحميل البيانات ثم تفعيل زر PDF
     let loaded = false;
 
     fetchCSV(sheetUrl).then(data => {
@@ -320,13 +313,57 @@
       alert("تعذر تحميل البيانات من Google Sheets. تحقق من رابط CSV أو إعدادات النشر.");
     });
 
-    // ---------- تصدير PDF (الحل هنا) ----------
+    // --------------------------
+    // 3) تصدير PDF: يطبع فقط (الاسم/اللقب/رقم التسجيل) + خانة إمضاء
+    //    ويضع أعلى الجدول: المستوى + التخصص + المقياس
+    // --------------------------
+    function getLevelLabel(val){
+      if (val === "license") return "ليسانس";
+      if (val === "master") return "ماستر";
+      return "";
+    }
+
     function exportToPDF() {
       if (!loaded) return;
 
       const table = document.getElementById("dataTable");
+      const rows = table.querySelectorAll("tbody tr");
 
-      // wrapper يجب أن يكون داخل DOM لكي لا يخرج PDF فارغ في بعض المتصفحات/البيئات
+      // جدول خاص بالطباعة
+      const printTable = document.createElement("table");
+      printTable.style.width = "100%";
+      printTable.style.borderCollapse = "collapse";
+
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th style="border:1px solid #000; padding:8px;">الاسم</th>
+          <th style="border:1px solid #000; padding:8px;">اللقب</th>
+          <th style="border:1px solid #000; padding:8px;">رقم التسجيل</th>
+          <th style="border:1px solid #000; padding:8px;">الإمضاء</th>
+        </tr>
+      `;
+      printTable.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll("td"); // [0]=الاسم, [1]=اللقب, [2]=رقم التسجيل...
+        if (!cells || cells.length < 3) return;
+
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+          <td style="border:1px solid #000; padding:8px;">${cells[0].textContent}</td>
+          <td style="border:1px solid #000; padding:8px;">${cells[1].textContent}</td>
+          <td style="border:1px solid #000; padding:8px;">${cells[2].textContent}</td>
+          <td style="border:1px solid #000; padding:16px;"></td>
+        `;
+        tbody.appendChild(newRow);
+      });
+
+      printTable.appendChild(tbody);
+
+      // Wrapper للطباعة
       const wrapper = document.createElement("div");
       wrapper.style.direction = "rtl";
       wrapper.style.fontFamily = "Arial, sans-serif";
@@ -338,13 +375,29 @@
       title.style.textAlign = "center";
       title.style.margin = "0 0 12px 0";
 
-      const clone = table.cloneNode(true);
-      clone.style.width = "100%";
+      // معلومات أعلى الجدول
+      const levelVal = document.getElementById("level")?.value || "";
+      const specialtyVal = document.getElementById("specialty")?.value || "";
+      const moduleVal = document.getElementById("search")?.value || "";
+
+      const info = document.createElement("div");
+      info.style.margin = "0 0 12px 0";
+      info.style.padding = "10px 12px";
+      info.style.border = "1px solid #ccc";
+      info.style.borderRadius = "8px";
+      info.style.background = "#f7f7f7";
+      info.style.lineHeight = "1.8";
+      info.innerHTML = `
+        <div><strong>المستوى:</strong> ${getLevelLabel(levelVal) || "—"}</div>
+        <div><strong>التخصص:</strong> ${(specialtyVal || "").trim() || "—"}</div>
+        <div><strong>المقياس:</strong> ${(moduleVal || "").trim() || "الكل"}</div>
+      `;
 
       wrapper.appendChild(title);
-      wrapper.appendChild(clone);
+      wrapper.appendChild(info);
+      wrapper.appendChild(printTable);
 
-      // إدراج مؤقت خارج الشاشة
+      // إدراج مؤقت في DOM (لتفادي PDF فارغ)
       const holder = document.createElement("div");
       holder.style.position = "fixed";
       holder.style.left = "-10000px";
@@ -353,17 +406,16 @@
       document.body.appendChild(holder);
 
       const opt = {
-        margin: 10, // بالـ mm ضمن jsPDF الافتراضي مع unit mm
-        filename: 'قائمة_الطلبة.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
+        margin: 10,
+        filename: "قائمة_الطلبة_للامضاء.pdf",
+        image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
           useCORS: true,
           backgroundColor: "#ffffff",
           scrollY: 0
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       };
 
       html2pdf()
@@ -371,7 +423,6 @@
         .from(wrapper)
         .save()
         .finally(() => {
-          // تنظيف
           document.body.removeChild(holder);
         });
     }
