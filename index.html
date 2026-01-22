@@ -278,19 +278,29 @@
     }
 
     function setupSearch(fullData) {
-      const input = document.getElementById('search');
+  const input = document.getElementById('search');
+  const moduleIndex = fullData[0].indexOf("المقياس"); // عمود المقياس من الهيدر
 
-      input.addEventListener('input', () => {
-        const term = input.value.toLowerCase();
+  input.addEventListener('input', () => {
+    const term = (input.value || "").trim().toLowerCase();
 
-        const filtered = fullData.filter((row, i) => {
-          if (i === 0) return false;
-          return row.some(cell => (cell || "").toLowerCase().includes(term));
-        });
-
-        displayData([fullData[0], ...filtered]);
-      });
+    // إذا خانة البحث فارغة: اعرض كل البيانات
+    if (!term) {
+      displayData(fullData);
+      return;
     }
+
+    // فلترة فقط على عمود "المقياس"
+    const filtered = fullData.filter((row, i) => {
+      if (i === 0) return false; // تجاهل الهيدر
+      const moduleCell = (row[moduleIndex] || "").toLowerCase();
+      return moduleCell.includes(term);
+    });
+
+    displayData([fullData[0], ...filtered]);
+  });
+}
+
 
     // تحميل البيانات ثم تفعيل زر PDF
     let loaded = false;
