@@ -114,7 +114,7 @@
   <main>
     <!-- القسم 1: عرض البرامج -->
     <section>
-      <h2 class="center-title">عرض البرنامج</h2>
+      <h2 class="center-title">عرض برنامج التخصص</h2>
 
       <label for="level">اختر المستوى:</label>
       <select id="level" onchange="populateSpecialties()">
@@ -136,8 +136,8 @@
     <!-- القسم 2: تبريرات التغيب + PDF -->
     <section>
       <h2 class="center-title">تبريرات التغيب في الامتحان حسب المقاييس</h2>
-      <p class="notice"> القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
-      <p class="notice"> في حالة عدم ظهور اسم مقياسكم في خانة البحث فهذا يعني انكم غير معنيين بالامتحان التعويض </p>
+      <p class="notice">القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
+
       <label for="search">اختر أو اكتب اسم المقياس:</label>
       <input list="modules" id="search" placeholder="اكتب اسم المقياس ..." />
       <datalist id="modules"></datalist>
@@ -164,35 +164,29 @@
     // ---------- برامج التخصص (كما هي) ----------
     const specialties = {
       license: [
+        "السنة الأولى تداول واسواق مالية",
+        "السنة الثانية جذع مشترك",
         "اقتصاد كمي",
         "اقتصاد دولي",
         "اقتصاد وتسيير المؤسسات",
-        "اقتصاد مالي ونقدي",
-        "السنة الثانية جذع مشترك",
-        "السنة الأولى تداول واسواق مالية"
+        "اقتصاد مالي ونقدي"
+        
       ],
       master: [
-        "ماستر اقتصاد كمي",
-        " ماستر اقتصاد دولي",
-        " ماستر اقتصاد وتسيير المؤسسات",
-        " ماستر اقتصاد مالي ونقدي",
-        " ماستر ذكاء اقتصادي وتحليل البيانات"
+        "ماستر 1 كل التخصصات",
+        " ماستر 2 كل التخصصات"
       ]
     };
 
-    const programImages = {
-      "اقتصاد كمي": "programs/LEQ.png",
-      "اقتصاد دولي": "programs/LEI.png",
-      "اقتصاد وتسيير المؤسسات": "programs/LEGE.png",
-      "اقتصاد مالي ونقدي": "programs/LEMF.png",
-      "السنة الثانية جذع مشترك": "programs/2TC.png",
-      "السنة الأولى تداول واسواق مالية": "programs/1TMF.png",
-
-      "ماستر اقتصاد كمي": "programs/MEQ.png",
-      " ماستر اقتصاد دولي": "programs/MEI.png",
-      " ماستر اقتصاد وتسيير المؤسسات": "programs/MEGE.png",
-      " ماستر اقتصاد مالي ونقدي": "programs/MEMF.png",
-      " ماستر ذكاء اقتصادي وتحليل البيانات": "programs/MEED.png"
+    const programPdfs = {
+      "السنة الأولى تداول واسواق مالية": "https://drive.google.com/file/d/13hBFuQSfPlJfSscTOBSYXtDTUJVuzRCX/preview",
+      "السنة الثانية جذع مشترك": "https://drive.google.com/file/d/1ry034O_xg67WiXtVXz2yMDGm_2FLe1DI/preview",
+      "اقتصاد كمي": "https://drive.google.com/file/d/1WuF_-D_RNFQiHOV_CET3XoxKoPh4hfqg/preview",
+      "اقتصاد دولي": "https://drive.google.com/file/d/18CLvLTUVeVGWSTCIqpOGwL6b-x4V8cLS/preview",
+      "اقتصاد وتسيير المؤسسات": "https://drive.google.com/file/d/1aH5LFsSgqmdSRaYrZGlqhh4NATmYz7G3/preview",
+      "اقتصاد مالي ونقدي": "https://drive.google.com/file/d/1G9UDj9Ho5H8nLWaBD1RDmJuStJvA2amf/preview",
+      "ماستر 1 كل التخصصات": "https://drive.google.com/file/d/1BUQKdCmsVuvd_X-qZbPef8oK2sdImJBK/preview",
+      " ماستر 2 كل التخصصات": "https://drive.google.com/file/d/1aMlSYmhX15HRh1WCkjqvHCsui25Qivoi/preview"
     };
 
     function populateSpecialties() {
@@ -213,16 +207,23 @@
     }
 
     function showProgramImage() {
-      const specialty = document.getElementById("specialty").value;
-      const imageUrl = programImages[specialty];
-      const container = document.getElementById("programImageContainer");
+  const specialty = document.getElementById("specialty").value;
+  const pdfUrl = programPdfs[specialty];
+  const container = document.getElementById("programImageContainer");
 
-      if (imageUrl) {
-        container.innerHTML = `<img src="${imageUrl}" alt="برنامج ${specialty}">`;
-      } else {
-        container.innerHTML = "";
-      }
-    }
+  if (pdfUrl) {
+    container.innerHTML = `
+      <iframe
+        src="${pdfUrl}"
+        style="width:100%; height:700px; border:1px solid #ccc; border-radius:8px; margin-top:20px;"
+        allow="autoplay"
+      ></iframe>
+    `;
+  } else {
+    container.innerHTML = "";
+  }
+}
+
 
     // ---------- CSV + الجدول ----------
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv';
