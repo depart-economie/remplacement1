@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>برنامج التعويضي والاطلاع على الأوراق</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- html2pdf -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,9 +34,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    h2, h3 {
-      color: #34495e;
-    }
+    h2, h3 { color: #34495e; }
 
     label {
       margin-top: 15px;
@@ -48,6 +49,7 @@
       border-radius: 6px;
       margin-top: 5px;
       font-size: 16px;
+      box-sizing: border-box;
     }
 
     button {
@@ -62,8 +64,11 @@
       transition: background 0.3s ease;
     }
 
-    button:hover {
-      background-color: #2980b9;
+    button:hover { background-color: #2980b9; }
+
+    button:disabled{
+      opacity: .6;
+      cursor: not-allowed;
     }
 
     img {
@@ -71,6 +76,14 @@
       max-width: 100%;
       border-radius: 8px;
       border: 1px solid #ccc;
+    }
+    .notice{
+     text-align: center;
+     margin: 8px 0 14px 0;
+     color: #2c3e50;
+    }
+    .center-title{
+     text-align: center;
     }
 
     .results {
@@ -80,27 +93,28 @@
       border-radius: 6px;
     }
 
-    .results ul {
-      padding-right: 20px;
-    }
+    .results ul { padding-right: 20px; }
 
     @media (max-width: 600px) {
-      main {
-        margin: 10px;
-        padding: 15px;
-      }
+      main { margin: 10px; padding: 15px; }
     }
+
+    /* جدول */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
   </style>
 </head>
-<body>
 
+<body>
   <header>
+    <h1> قسم العلوم الاقتصادية</h1>
     <h1>برنامج الامتحانات التعويضية والاطلاع على الأوراق</h1>
   </header>
 
   <main>
+    <!-- القسم 1: عرض البرامج -->
     <section>
-      <h2>عرض برنامج التخصص</h2>
+      <h2 class="center-title">عرض برنامج التخصص</h2>
 
       <label for="level">اختر المستوى:</label>
       <select id="level" onchange="populateSpecialties()">
@@ -119,22 +133,50 @@
 
     <hr style="margin: 30px 0;">
 
+    <!-- القسم 2: تبريرات التغيب + PDF -->
+    <section>
+      <h2 class="center-title">تبريرات التغيب في الامتحان حسب المقاييس</h2>
+      <p class="notice">القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
+
+      <label for="search">اختر أو اكتب اسم المقياس:</label>
+      <input list="modules" id="search" placeholder="اكتب اسم المقياس ..." />
+      <datalist id="modules"></datalist>
+
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>رقم التسجيل</th>
+            <th>المقياس</th>
+            <th>التخصص</th>
+            <th>المستوى</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button id="pdfBtn" onclick="exportToPDF()" disabled>تحميل القائمة كـ PDF</button>
+    </section>
   </main>
 
   <script>
+    // ---------- برامج التخصص (كما هي) ----------
     const specialties = {
       license: [
         "اقتصاد كمي",
         "اقتصاد دولي",
         "اقتصاد وتسيير المؤسسات",
         "اقتصاد مالي ونقدي",
-        "السنة الثانية جذع مشترك"
+        "السنة الثانية جذع مشترك",
+        "السنة الأولى تداول واسواق مالية"
       ],
       master: [
         "ماستر اقتصاد كمي",
         " ماستر اقتصاد دولي",
         " ماستر اقتصاد وتسيير المؤسسات",
-        " ماستر اقتصاد مالي ونقدي"
+        " ماستر اقتصاد مالي ونقدي",
+        " ماستر ذكاء اقتصادي وتحليل البيانات"
       ]
     };
 
@@ -144,11 +186,13 @@
       "اقتصاد وتسيير المؤسسات": "programs/LEGE.png",
       "اقتصاد مالي ونقدي": "programs/LEMF.png",
       "السنة الثانية جذع مشترك": "programs/2TC.png",
+      "السنة الأولى تداول واسواق مالية": "programs/1TMF.png",
+
       "ماستر اقتصاد كمي": "programs/MEQ.png",
       " ماستر اقتصاد دولي": "programs/MEI.png",
       " ماستر اقتصاد وتسيير المؤسسات": "programs/MEGE.png",
       " ماستر اقتصاد مالي ونقدي": "programs/MEMF.png",
-      "ماستر اقتصاد كمي": "programs/MEQ.png"
+      " ماستر ذكاء اقتصادي وتحليل البيانات": "programs/MEED.png"
     };
 
     function populateSpecialties() {
@@ -180,67 +224,35 @@
       }
     }
 
-  </script>
+    // ---------- CSV + الجدول ----------
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv';
 
-</body>
-</html>
-
-<html lang="ar">
-<head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <meta charset="UTF-8">
-  <title>التحقق من وجود الامتحان التعويضي</title>
-  <style>
-    body { font-family: Arial; direction: rtl; padding: 20px; background: #f5f5f5; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-    input { padding: 10px; width: 100%; margin-top: 10px; font-size: 16px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>تبريرات التغيب في الامتحان حسب المقاييس</h1>
-    <p dir="rtl">القائمة غير نهائية يرجى تفقدها 24 ساعة قبل الامتحان</p>
-  <header>
-  <label for="search">اختر أو اكتب اسم المقياس:</label>
-  <input list="modules" id="search" placeholder="اكتب اسم المقياس ...">
-  <datalist id="modules"></datalist>
-
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>الاسم</th>
-        <th>اللقب</th>
-        <th>رقم التسجيل</th>
-        <th>المقياس</th>
-        <th>التخصص</th>
-        <th>المستوى</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button onclick="exportToPDF()">تحميل القائمة كـ PDF</button>
-  <script>
-    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREueC1I9dE5e7hu1SJpRg13SJ8Fya9mfT396J9zcSslRzwhX51YXd6jhMz23Y2_P1iwi1O3BvhJRH1/pub?output=csv'; // ← ضع رابط CSV هنا
-
+    // ملاحظة: هذا parser بسيط. إن كان CSV يحتوي فواصل داخل نصوص بين " " فالأفضل استخدام PapaParse.
     async function fetchCSV(url) {
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: "no-store" });
       const text = await response.text();
-      return text.split('\n').map(row => row.split(','));
+
+      return text
+        .trim()
+        .split('\n')
+        .map(row => row.split(',').map(c => (c ?? "").trim()));
     }
 
     function getUniqueModules(data) {
       const moduleIndex = data[0].indexOf("المقياس");
       const modules = new Set();
+
       data.slice(1).forEach(row => {
         if (row[moduleIndex]) modules.add(row[moduleIndex].trim());
       });
+
       return [...modules];
     }
 
     function fillModuleSuggestions(modules) {
       const datalist = document.getElementById("modules");
       datalist.innerHTML = "";
+
       modules.forEach(module => {
         const option = document.createElement("option");
         option.value = module;
@@ -251,64 +263,106 @@
     function displayData(data) {
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
+
       data.slice(1).forEach(row => {
         if (row.length < 6) return;
+
         const tr = document.createElement('tr');
-        row.forEach(cell => {
+        for (let i = 0; i < 6; i++) {
           const td = document.createElement('td');
-          td.textContent = cell;
+          td.textContent = row[i] ?? "";
           tr.appendChild(td);
-        });
+        }
         tbody.appendChild(tr);
       });
     }
 
-    function setupSearch(data) {
+    function setupSearch(fullData) {
       const input = document.getElementById('search');
+
       input.addEventListener('input', () => {
         const term = input.value.toLowerCase();
-        const filtered = data.filter((row, i) => {
+
+        const filtered = fullData.filter((row, i) => {
           if (i === 0) return false;
-          return row.some(cell => cell.toLowerCase().includes(term));
+          return row.some(cell => (cell || "").toLowerCase().includes(term));
         });
-        displayData([data[0], ...filtered]);
+
+        displayData([fullData[0], ...filtered]);
       });
     }
+
+    // تحميل البيانات ثم تفعيل زر PDF
+    let loaded = false;
 
     fetchCSV(sheetUrl).then(data => {
       const modules = getUniqueModules(data);
       fillModuleSuggestions(modules);
       displayData(data);
       setupSearch(data);
+
+      loaded = true;
+      document.getElementById("pdfBtn").disabled = false;
+    }).catch(err => {
+      console.error(err);
+      alert("تعذر تحميل البيانات من Google Sheets. تحقق من رابط CSV أو إعدادات النشر.");
     });
+
+    // ---------- تصدير PDF (الحل هنا) ----------
     function exportToPDF() {
-    const element = document.getElementById("dataTable");
+      if (!loaded) return;
 
-    const opt = {
-      margin: 0.5,
-      filename: 'قائمة_الطلبة.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
+      const table = document.getElementById("dataTable");
 
-    // نسخ مؤقت لدعم RTL وخط عربي
-    const clone = element.cloneNode(true);
-    clone.style.direction = 'rtl';
-    clone.style.textAlign = 'right';
+      // wrapper يجب أن يكون داخل DOM لكي لا يخرج PDF فارغ في بعض المتصفحات/البيئات
+      const wrapper = document.createElement("div");
+      wrapper.style.direction = "rtl";
+      wrapper.style.fontFamily = "Arial, sans-serif";
+      wrapper.style.background = "#fff";
+      wrapper.style.padding = "16px";
 
-    // غلاف يحتوي على عنوان + جدول
-    const wrapper = document.createElement("div");
-    const title = document.createElement("h2");
-    title.textContent = "قائمة الطلبة المعنيين بالامتحان التعويضي";
-    title.style.textAlign = 'center';
-    wrapper.appendChild(title);
-    wrapper.appendChild(clone);
-    wrapper.style.fontFamily = 'Arial, sans-serif';
+      const title = document.createElement("h2");
+      title.textContent = "قائمة الطلبة المعنيين بالامتحان التعويضي";
+      title.style.textAlign = "center";
+      title.style.margin = "0 0 12px 0";
 
-    html2pdf().set(opt).from(wrapper).save();
-  }
-</script>
+      const clone = table.cloneNode(true);
+      clone.style.width = "100%";
 
+      wrapper.appendChild(title);
+      wrapper.appendChild(clone);
+
+      // إدراج مؤقت خارج الشاشة
+      const holder = document.createElement("div");
+      holder.style.position = "fixed";
+      holder.style.left = "-10000px";
+      holder.style.top = "0";
+      holder.appendChild(wrapper);
+      document.body.appendChild(holder);
+
+      const opt = {
+        margin: 10, // بالـ mm ضمن jsPDF الافتراضي مع unit mm
+        filename: 'قائمة_الطلبة.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          scrollY: 0
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+
+      html2pdf()
+        .set(opt)
+        .from(wrapper)
+        .save()
+        .finally(() => {
+          // تنظيف
+          document.body.removeChild(holder);
+        });
+    }
+  </script>
 </body>
 </html>
